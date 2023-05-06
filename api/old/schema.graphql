@@ -1,0 +1,107 @@
+type Query {
+  search(searchString: String = "*", 
+         genreID: BigInt = 4, 
+         parentPlatformID: BigInt = 1): [Game!]
+    @cypher(
+      statement:"""
+      CALL db.index.fulltext.queryNodes('gameNameIndex', $searchString+'~') YIELD node WITH node
+      MATCH (pp:ParentPlatform {id: $parentPlatformID})<-[:IN_CATEGORY]-(:Platform)-[:CAN_PLAY]->(node:Game) 
+      WITH node
+      MATCH (node)-[:HAS_GENRE]->(ge:Genre {id: $genreID})
+      RETURN node
+      """
+    )
+}
+
+type User {
+  name: String
+  email: String!
+  passward: String!
+  recommend(gameID: BigInt!,  first: Int = 6): [User]
+    @cypher(
+      statement: """
+      MATCH (this)-[:WANT_PLAY]->(g:Game {id: $gameID})<-[:WANT_PLAY]-(others:User)
+
+      OPTIONAL MATCH (u)-[r1s:LIKE|CLICK]->(gs:Game)<-[r2s:LIKE|CLICK]-(others)
+      WITH r1s, r2s, (r1s.value+r2s.value)*100 AS scores1, others
+      UNWIND others as other
+      WITH other AS others, sum(scores1) AS scores1
+
+      OPTIONAL MATCH (u)-[rel21s:LIKE|CLICK]->(g1s:Game)-[:DEVELOP|CAN_PLAY|PUBLISH|HAS_GENRE|HAS_TAG]-(overlaps)-[:DEVELOP|CAN_PLAY|PUBLISH|HAS_GENRE|HAS_TAG]-(g2s:Game)<-[rel22s:LIKE|CLICK]-(others)
+      WITH rel21s, rel22s, count(overlaps)*(rel21s.value+rel22s.value) AS scores2, others, scores1
+      UNWIND others AS other
+      WITH other, sum(scores2) AS scores2, scores1
+      WITH other AS others, scores2+scores1 AS scores 
+      RETURN others ORDER BY scores DESC
+      """
+    )
+}
+
+type Developer @exclude(operations: [CREATE, UPDATE, DELETE]) {
+  games: [Game!]! @relationship(type: "DEVELOP", direction: OUT)
+  id: BigInt!
+  name: String
+  slug: String
+}
+
+type Game @exclude(operations: [CREATE, UPDATE, DELETE]) {
+  background_image: String
+  developers: [Developer!]! @relationship(type: "DEVELOP", direction: IN)
+  genres: [Genre!]! @relationship(type: "HAS_GENRE", direction: OUT)
+  tags: [Tag!]! @relationship(type: "HAS_TAG", direction: OUT)
+  id: BigInt!
+  metacritic: BigInt
+  name: String
+  platforms: [Platform!]! @relationship(type: "CAN_PLAY", direction: IN)
+  publishers: [Publisher!]! @relationship(type: "PUBLISH", direction: IN)
+  rating: Float
+  rating_top: BigInt
+  released: Date
+  slug: String
+  similar(first: Int = 6): [Game]
+    @cypher(
+      statement: """
+      MATCH (this)-[:DEVELOP|:CAN_PLAY|:PUBLISH|:HAS_GENRE|:HAS_TAG]-(overlap)-[:DEVELOP|:CAN_PLAY|:PUBLISH|:HAS_GENRE|:HAS_TAG]-(res:Game)
+      WITH res, COUNT(*) AS score
+         RETURN res ORDER BY score DESC LIMIT $first
+      """
+    )
+}
+
+type Genre @exclude(operations: [CREATE, UPDATE, DELETE]) {
+  games: [Game!]! @relationship(type: "HAS_GENRE", direction: IN)
+  id: BigInt!
+  image_background: String
+  name: String
+  slug: String
+}
+
+type ParentPlatform @exclude(operations: [CREATE, UPDATE, DELETE]) {
+  id: BigInt!
+  name: String
+  platforms: [Platform!]! @relationship(type: "IN_CATEGORY", direction: IN)
+  slug: String
+}
+
+type Platform @exclude(operations: [CREATE, UPDATE, DELETE]) {
+  games: [Game!]! @relationship(type: "CAN_PLAY", direction: OUT)
+  id: BigInt!
+  parent_platforms: [ParentPlatform!]!
+    @relationship(type: "IN_CATEGORY", direction: OUT)
+  name: String
+  slug: String
+}
+
+type Publisher @exclude(operations: [CREATE, UPDATE, DELETE]) {
+  id: BigInt!
+  name: String
+  games: [Game!]! @relationship(type: "PUBLISH", direction: OUT)
+  slug: String
+}
+
+type Tag @exclude(operations: [CREATE, UPDATE, DELETE]) {
+  games: [Game!]! @relationship(type: "HAS_TAG", direction: IN)
+  id: BigInt!
+  name: String
+  slug: String
+}

@@ -1,0 +1,100 @@
+type Query {
+  search(
+    searchString: String = "*"
+    genreID: String = "4"
+    parentPlatformID: String = "1"
+  ): [Game]
+    @cypher(
+      statement: """
+      CALL db.index.fulltext.queryNodes('gameNameIndex', $searchString+'~') 
+      YIELD node WITH node
+      MATCH (pp:ParentPlatform {id: $parentPlatformID})<-[:IN_CATEGORY]-(:Platform)-[:CAN_PLAY]->(node:Game)
+      WITH node
+      MATCH (node)-[:HAS_GENRE]->(ge:Genre {id: $genreID})
+      RETURN node
+      """
+    )
+}
+
+interface ClickProperties @relationshipProperties {
+  value: BigInt!
+}
+
+type Developer {
+  games: [Game!]! @relationship(type: "DEVELOP", direction: OUT)
+  id: ID!
+  name: String!
+  slug: String!
+}
+
+type Game @exclude(operations: [CREATE, UPDATE, DELETE]) {
+  background_image: String
+  developers: [Developer!]! @relationship(type: "DEVELOP", direction: IN)
+  genres: [Genre!]! @relationship(type: "HAS_GENRE", direction: OUT)
+  tags: [Tag!]! @relationship(type: "HAS_TAG", direction: OUT)
+  id: ID!
+  metacritic: BigInt
+  name: String!
+  platforms: [Platform!]! @relationship(type: "CAN_PLAY", direction: IN)
+  publishers: [Publisher!]! @relationship(type: "PUBLISH", direction: IN)
+  rating: Float!
+  rating_top: BigInt!
+  released: Date
+  slug: String!
+  users_click: [User!]!
+    @relationship(type: "CLICK", direction: IN, properties: "ClickProperties")
+  users_like: [User!]!
+    @relationship(type: "LIKE", direction: IN, properties: "LikeProperties")
+  users_want_play: [User!]! @relationship(type: "WANT_PLAY", direction: IN)
+}
+
+type Genre {
+  games: [Game!]! @relationship(type: "HAS_GENRE", direction: IN)
+  id: ID!
+  image_background: String!
+  name: String!
+  slug: String!
+}
+
+interface LikeProperties @relationshipProperties {
+  value: BigInt!
+}
+
+type ParentPlatform {
+  id: ID!
+  name: String!
+  platforms: [Platform!]! @relationship(type: "IN_CATEGORY", direction: IN)
+  slug: String!
+}
+
+type Platform {
+  games: [Game!]! @relationship(type: "CAN_PLAY", direction: OUT)
+  id: ID!
+  parent_platforms: ParentPlatform!
+    @relationship(type: "IN_CATEGORY", direction: OUT)
+  name: String!
+  slug: String!
+}
+
+type Publisher {
+  id: ID!
+  name: String!
+  publish: [Game!]! @relationship(type: "PUBLISH", direction: OUT)
+  slug: String!
+}
+
+type Tag {
+  games: [Game!]! @relationship(type: "HAS_TAG", direction: IN)
+  id: ID!
+  name: String!
+  slug: String!
+}
+
+type User {
+  click: [Game!]!
+    @relationship(type: "CLICK", direction: OUT, properties: "ClickProperties")
+  like: [Game!]!
+    @relationship(type: "LIKE", direction: OUT, properties: "LikeProperties")
+  name: String!
+  want_play: [Game!]! @relationship(type: "WANT_PLAY", direction: OUT)
+}
