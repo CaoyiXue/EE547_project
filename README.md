@@ -1,1 +1,1 @@
-# EE547_project
+# EE547_project Meet Game
