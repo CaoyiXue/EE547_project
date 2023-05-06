@@ -1,10 +1,20 @@
-CALL db.index.fulltext.queryNodes('gameNameIndex', $searchString)
+type Query {
+  search(
+    searchString: String = "*"
+    genreId: String
+    parentPlatformId: String
+    order: String = ""
+    options: GameOptions
+  ): [Game!]
+    @cypher(
+      statement: """
+      CALL db.index.fulltext.queryNodes('gameNameIndex', $searchString)
       YIELD node WITH node
       CALL apoc.do.when(
         $genreId IS NULL,
         'RETURN node',
         'MATCH (node)-[:HAS_GENRE]->(:Genre {id: genreId}) RETURN node',
-        {genreId: $genreId, node:node}
+        {genreId: $genreId, node: node}
       ) YIELD value
       WITH value.node AS node
       CALL apoc.do.when(
@@ -16,74 +26,53 @@ CALL db.index.fulltext.queryNodes('gameNameIndex', $searchString)
       WITH value.node AS node
       RETURN DISTINCT node
       ORDER BY node[$order] DESC
-      SKIP $offset LIMIT $limit
-type Query {
-  search(
-    searchString: String = "*"
-    genreID: String = "4"
-    parentPlatformID: String = "1"
-  ): [Game]
-    @cypher(
-      statement: """
-      CALL db.index.fulltext.queryNodes('gameNameIndex', $searchString)
-      YIELD node WITH node
-      MATCH (node)-[:HAS_GENRE]->(ge:Genre)
-      WHERE ge.id = $genreId
-      MATCH (pp:ParentPlatform)<-[:IN_CATEGORY]-(:Platform)-[:CAN_PLAY]->(node)
-      WHERE pp.id = $parentPlatformId
-      RETURN DISTINCT node
-      ORDER BY node[$order] DESC
-      SKIP $offset LIMIT $limit
+      SKIP $options.offset LIMIT $options.limit
       """
     )
 }
 
-interface ClickProperties @relationshipProperties {
-  value: BigInt!
-}
-
 type Developer {
   games: [Game!]! @relationship(type: "DEVELOP", direction: OUT)
-  id: ID!
+  id: String!
   name: String!
   slug: String!
 }
 
-type Game @exclude(operations: [CREATE, UPDATE, DELETE]) {
+type Game {
   background_image: String
+  description_raw: String!
   developers: [Developer!]! @relationship(type: "DEVELOP", direction: IN)
   genres: [Genre!]! @relationship(type: "HAS_GENRE", direction: OUT)
   tags: [Tag!]! @relationship(type: "HAS_TAG", direction: OUT)
-  id: ID!
-  metacritic: BigInt
+  id: String!
+  metacritic: Float
   name: String!
   platforms: [Platform!]! @relationship(type: "CAN_PLAY", direction: IN)
+  parent_platforms: [ParentPlatform!]!
+    @cypher(
+      statement: """
+      MATCH (this)<-[:CAN_PLAY]-(:Platform)-[:IN_CATEGORY]->(pp:ParentPlatform)
+      RETURN DISTINCT pp
+      """
+    )
   publishers: [Publisher!]! @relationship(type: "PUBLISH", direction: IN)
   rating: Float!
-  rating_top: BigInt!
+  rating_top: Float!
   released: Date
+  screen_shots: [String]!
   slug: String!
-  users_click: [User!]!
-    @relationship(type: "CLICK", direction: IN, properties: "ClickProperties")
-  users_like: [User!]!
-    @relationship(type: "LIKE", direction: IN, properties: "LikeProperties")
-  users_want_play: [User!]! @relationship(type: "WANT_PLAY", direction: IN)
 }
 
 type Genre {
   games: [Game!]! @relationship(type: "HAS_GENRE", direction: IN)
-  id: ID!
+  id: String!
   image_background: String!
   name: String!
   slug: String!
 }
 
-interface LikeProperties @relationshipProperties {
-  value: BigInt!
-}
-
 type ParentPlatform {
-  id: ID!
+  id: String!
   name: String!
   platforms: [Platform!]! @relationship(type: "IN_CATEGORY", direction: IN)
   slug: String!
@@ -91,32 +80,23 @@ type ParentPlatform {
 
 type Platform {
   games: [Game!]! @relationship(type: "CAN_PLAY", direction: OUT)
-  id: ID!
-  parent_platforms: ParentPlatform!
+  id: String!
+  parent_platforms: [ParentPlatform!]!
     @relationship(type: "IN_CATEGORY", direction: OUT)
   name: String!
   slug: String!
 }
 
 type Publisher {
-  id: ID!
+  id: String!
   name: String!
-  publish: [Game!]! @relationship(type: "PUBLISH", direction: OUT)
+  games: [Game!]! @relationship(type: "PUBLISH", direction: OUT)
   slug: String!
 }
 
 type Tag {
   games: [Game!]! @relationship(type: "HAS_TAG", direction: IN)
-  id: ID!
+  id: String!
   name: String!
   slug: String!
-}
-
-type User {
-  click: [Game!]!
-    @relationship(type: "CLICK", direction: OUT, properties: "ClickProperties")
-  like: [Game!]!
-    @relationship(type: "LIKE", direction: OUT, properties: "LikeProperties")
-  name: String!
-  want_play: [Game!]! @relationship(type: "WANT_PLAY", direction: OUT)
 }

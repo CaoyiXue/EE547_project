@@ -7,7 +7,7 @@ import genres from "./genres.js";
 
 const driver = neo4j.driver(
   "neo4j+s://7466064e.databases.neo4j.io",
-  neo4j.auth.basic("neo4j", "8GU95iYJYmvGfmp1AWl2p8xJX86z3CSSm9Mq4tx138s")
+  neo4j.auth.basic("neo4j", "caoyixue")
 );
 const client = axios.create({
   baseURL: "https://api.rawg.io/api",

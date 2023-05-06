@@ -1,23 +1,32 @@
 type Query {
   search(
     searchString: String = "*"
-    genreId: ID = ".*"
-    parentPlatformId: ID = ".*"
-    offset: Int = 0
-    limit: Int = 12
+    genreId: ID
+    parentPlatformId: ID
     order: String = ""
+    options: GameOptions
   ): [Game!]
     @cypher(
       statement: """
       CALL db.index.fulltext.queryNodes('gameNameIndex', $searchString)
       YIELD node WITH node
-      MATCH (node)-[:HAS_GENRE]->(ge:Genre)
-      WHERE ge.id =~ $genreId
-      MATCH (pp:ParentPlatform)<-[:IN_CATEGORY]-(:Platform)-[:CAN_PLAY]->(node)
-      WHERE pp.id =~ $parentPlatformId
+      CALL apoc.do.when(
+        $genreId IS NULL,
+        'RETURN node',
+        'MATCH (node)-[:HAS_GENRE]->(:Genre {id: genreId}) RETURN node',
+        {genreId: $genreId, node: node}
+      ) YIELD value
+      WITH value.node AS node
+      CALL apoc.do.when(
+        $parentPlatformId IS NULL,
+        'RETURN node',
+        'MATCH (:ParentPlatform {id: parentPlatformId})<-[:IN_CATEGORY]-(:Platform)-[:CAN_PLAY]->(node) RETURN node',
+        {parentPlatformId: $parentPlatformId, node: node}
+      ) YIELD value
+      WITH value.node AS node
       RETURN DISTINCT node
       ORDER BY node[$order] DESC
-      SKIP $offset LIMIT $limit
+      SKIP $options.offset LIMIT $options.limit
       """
     )
 }
