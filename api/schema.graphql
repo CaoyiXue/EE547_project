@@ -1,15 +1,21 @@
 type Query {
   search(
-    searchString: String = "*"
+    searchString: String
     genreId: ID
     parentPlatformId: ID
+    offset: Int
+    limit: Int
     order: String = ""
-    options: GameOptions
   ): [Game!]
     @cypher(
       statement: """
-      CALL db.index.fulltext.queryNodes('gameNameIndex', $searchString)
-      YIELD node WITH node
+      CALL apoc.do.when(
+        searchString IS NULL,
+        'MATCH (node:Game) RETURN node',
+        'CALL db.index.fulltext.queryNodes(index, searchString) YIELD node',
+        {searchString: $searchString, index: 'gameNameIndex'}
+      ) YIELD value
+      WITH value.node AS node
       CALL apoc.do.when(
         $genreId IS NULL,
         'RETURN node',
@@ -26,7 +32,7 @@ type Query {
       WITH value.node AS node
       RETURN DISTINCT node
       ORDER BY node[$order] DESC
-      SKIP $options.offset LIMIT $options.limit
+      SKIP $offset LIMIT $limit
       """
     )
 }

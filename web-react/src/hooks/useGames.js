@@ -1,30 +1,49 @@
-import { CanceledError } from "axios";
-import apiClient from "../services/api_client";
-import { useState, useEffect } from "react";
-const useGames = () => {
-  const [games, setGames] = useState([]);
-  const [error, setError] = useState("");
-  const [isLoading, setLoading] = useState(false);
+import { useQuery, gql } from "@apollo/client";
 
-  useEffect(() => {
-    const controller = new AbortController();
-    setLoading(true);
-    apiClient
-      .get("/games", { signal: controller.signal })
-      .then((res) => {
-        setGames(res.data);
-        setLoading(false);
-      })
-      .catch((err) => {
-        if (err instanceof CanceledError) return;
-        setError(err.message);
-        setLoading(false);
-      });
+const SEARCH_GAMES = gql`
+  query Query(
+    $searchString: String
+    $genreId: ID
+    $parentPlatformId: ID
+    $offset: Int
+    $limit: Int
+    $order: String
+  ) {
+    search(
+      searchString: $searchString
+      genreId: $genreId
+      parentPlatformId: $parentPlatformId
+      offset: $offset
+      limit: $limit
+      order: $order
+    ) {
+      id
+      metacritic
+      name
+      parent_platforms {
+        id
+        slug
+        name
+      }
+      rating
+      rating_top
+      slug
+      background_image
+    }
+  }
+`;
 
-    return () => controller.abort();
-  }, []);
-
-  return { games, error, isLoading };
+const useGames = (gameQuery) => {
+  return useQuery(SEARCH_GAMES, {
+    variables: {
+      searchString: gameQuery.searchString,
+      genreId: gameQuery.genre?.id,
+      parentPlatformId: gameQuery.parentPlatform?.id,
+      offset: 0,
+      limit: 12,
+      order: gameQuery.sortOrder,
+    },
+  });
 };
 
 export default useGames;
