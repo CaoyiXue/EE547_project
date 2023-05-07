@@ -13,7 +13,18 @@ const GameGrid = ({ gameQuery }) => {
   const fetchedGamesCount = data?.search?.length || 0;
 
   return (
-    <Box padding="10px">
+    <InfiniteScroll
+      dataLength={fetchedGamesCount}
+      hasMore={true}
+      next={() =>
+        fetchMore({
+          variables: {
+            offset: fetchedGamesCount,
+          },
+        })
+      }
+      loader={<Spinner />}
+    >
       <SimpleGrid columns={{ sm: 1, md: 2, lg: 3, xl: 4 }} spacing={6}>
         {!!loading &&
           skeletons.map((skeleton) => (
@@ -27,7 +38,7 @@ const GameGrid = ({ gameQuery }) => {
           </GameCardContainer>
         ))}
       </SimpleGrid>
-      <Button
+      {/* <Button
         onClick={(event) =>
           fetchMore({
             variables: {
@@ -37,8 +48,8 @@ const GameGrid = ({ gameQuery }) => {
         }
       >
         {"Load More"}
-      </Button>
-    </Box>
+      </Button> */}
+    </InfiniteScroll>
   );
 };
 
