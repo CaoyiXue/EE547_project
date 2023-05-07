@@ -1,4 +1,5 @@
-import { SimpleGrid, Text } from "@chakra-ui/layout";
+import { SimpleGrid, Text, Spinner, Button, Box } from "@chakra-ui/react";
+import InfiniteScroll from "react-infinite-scroll-component";
 import GameCard from "./GameCard";
 import GameCardContainer from "./GameCardContainer";
 import GameCardSkeleton from "./GameCardSkeleton";
@@ -9,25 +10,35 @@ const GameGrid = ({ gameQuery }) => {
   const skeletons = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12];
 
   if (error) return <Text>{error.message}</Text>;
+  // const fetchedGamesCount = data?.length || 0;
 
   return (
-    <SimpleGrid
-      columns={{ sm: 1, md: 2, lg: 3, xl: 4 }}
-      padding="10px"
-      spacing={6}
-    >
-      {!!loading &&
-        skeletons.map((skeleton) => (
-          <GameCardContainer key={skeleton}>
-            <GameCardSkeleton />
+    <Box padding="10px">
+      <SimpleGrid columns={{ sm: 1, md: 2, lg: 3, xl: 4 }} spacing={6}>
+        {!!loading &&
+          skeletons.map((skeleton) => (
+            <GameCardContainer key={skeleton}>
+              <GameCardSkeleton />
+            </GameCardContainer>
+          ))}
+        {data?.search.map((game) => (
+          <GameCardContainer key={game.id}>
+            <GameCard game={game} />
           </GameCardContainer>
         ))}
-      {data?.search.map((game) => (
-        <GameCardContainer key={game.id}>
-          <GameCard game={game} />
-        </GameCardContainer>
-      ))}
-    </SimpleGrid>
+      </SimpleGrid>
+      <Button
+        onClick={() =>
+          fetchMore({
+            variables: {
+              offset: data?.search?.length || 0,
+            },
+          })
+        }
+      >
+        {loading ? "Loading..." : "Load More"}
+      </Button>
+    </Box>
   );
 };
 

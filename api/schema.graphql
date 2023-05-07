@@ -1,10 +1,10 @@
 type Query {
   search(
-    searchString: String
+    searchString: String = "*"
     genreId: String
     parentPlatformId: String
-    offset: Int
-    limit: Int
+    offset: Int = 0
+    limit: Int = 12
     order: String = ""
   ): [Game!]
     @cypher(
