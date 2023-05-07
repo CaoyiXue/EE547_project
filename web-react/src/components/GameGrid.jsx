@@ -8,7 +8,7 @@ const GameGrid = ({ gameQuery }) => {
   const { loading, error, data, fetchMore } = useGames(gameQuery);
   const skeletons = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12];
 
-  if (error) return <Text>{error}</Text>;
+  if (error) return <Text>{error.message}</Text>;
 
   return (
     <SimpleGrid
@@ -16,17 +16,17 @@ const GameGrid = ({ gameQuery }) => {
       padding="10px"
       spacing={6}
     >
-      {!!loading
-        ? skeletons.map((skeleton) => (
-            <GameCardContainer key={skeleton}>
-              <GameCardSkeleton />
-            </GameCardContainer>
-          ))
-        : data?.search.map((game) => (
-            <GameCardContainer key={game.id}>
-              <GameCard game={game} />
-            </GameCardContainer>
-          ))}
+      {!!loading &&
+        skeletons.map((skeleton) => (
+          <GameCardContainer key={skeleton}>
+            <GameCardSkeleton />
+          </GameCardContainer>
+        ))}
+      {data?.search.map((game) => (
+        <GameCardContainer key={game.id}>
+          <GameCard game={game} />
+        </GameCardContainer>
+      ))}
     </SimpleGrid>
   );
 };

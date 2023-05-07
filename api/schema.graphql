@@ -1,8 +1,8 @@
 type Query {
   search(
     searchString: String
-    genreId: ID
-    parentPlatformId: ID
+    genreId: String
+    parentPlatformId: String
     offset: Int
     limit: Int
     order: String = ""
@@ -12,7 +12,7 @@ type Query {
       CALL apoc.do.when(
         searchString IS NULL,
         'MATCH (node:Game) RETURN node',
-        'CALL db.index.fulltext.queryNodes(index, searchString) YIELD node',
+        'CALL db.index.fulltext.queryNodes(index, searchString) YIELD node WITH node RETURN node',
         {searchString: $searchString, index: 'gameNameIndex'}
       ) YIELD value
       WITH value.node AS node
@@ -39,7 +39,7 @@ type Query {
 
 type Developer {
   games: [Game!]! @relationship(type: "DEVELOP", direction: OUT)
-  id: ID!
+  id: String!
   name: String!
   slug: String!
 }
@@ -50,7 +50,7 @@ type Game {
   developers: [Developer!]! @relationship(type: "DEVELOP", direction: IN)
   genres: [Genre!]! @relationship(type: "HAS_GENRE", direction: OUT)
   tags: [Tag!]! @relationship(type: "HAS_TAG", direction: OUT)
-  id: ID!
+  id: String!
   metacritic: Float
   name: String!
   platforms: [Platform!]! @relationship(type: "CAN_PLAY", direction: IN)
@@ -71,14 +71,14 @@ type Game {
 
 type Genre {
   games: [Game!]! @relationship(type: "HAS_GENRE", direction: IN)
-  id: ID!
+  id: String!
   image_background: String!
   name: String!
   slug: String!
 }
 
 type ParentPlatform {
-  id: ID!
+  id: String!
   name: String!
   platforms: [Platform!]! @relationship(type: "IN_CATEGORY", direction: IN)
   slug: String!
@@ -86,7 +86,7 @@ type ParentPlatform {
 
 type Platform {
   games: [Game!]! @relationship(type: "CAN_PLAY", direction: OUT)
-  id: ID!
+  id: String!
   parent_platforms: [ParentPlatform!]!
     @relationship(type: "IN_CATEGORY", direction: OUT)
   name: String!
@@ -94,7 +94,7 @@ type Platform {
 }
 
 type Publisher {
-  id: ID!
+  id: String!
   name: String!
   games: [Game!]! @relationship(type: "PUBLISH", direction: OUT)
   slug: String!
@@ -102,7 +102,7 @@ type Publisher {
 
 type Tag {
   games: [Game!]! @relationship(type: "HAS_TAG", direction: IN)
-  id: ID!
+  id: String!
   name: String!
   slug: String!
 }

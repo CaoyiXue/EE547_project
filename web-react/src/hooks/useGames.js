@@ -3,8 +3,8 @@ import { useQuery, gql } from "@apollo/client";
 const SEARCH_GAMES = gql`
   query Query(
     $searchString: String
-    $genreId: ID
-    $parentPlatformId: ID
+    $genreId: String
+    $parentPlatformId: String
     $offset: Int
     $limit: Int
     $order: String
@@ -34,14 +34,15 @@ const SEARCH_GAMES = gql`
 `;
 
 const useGames = (gameQuery) => {
+  console.log(gameQuery);
   return useQuery(SEARCH_GAMES, {
     variables: {
-      searchString: gameQuery.searchString,
-      genreId: gameQuery.genre?.id,
-      parentPlatformId: gameQuery.parentPlatform?.id,
+      searchString: gameQuery.searchString || null,
+      genreId: gameQuery.genre?.id || null,
+      parentPlatformId: gameQuery.parentPlatform?.id || null,
       offset: 0,
       limit: 12,
-      order: gameQuery.sortOrder,
+      order: gameQuery.sortOrder || "",
     },
   });
 };
