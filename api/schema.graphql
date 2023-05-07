@@ -1,37 +1,43 @@
 type Query {
   search(
-    searchString: String = "*"
+    searchString: String
     genreId: String
     parentPlatformId: String
     offset: Int = 0
     limit: Int = 12
-    order: String = ""
+    order: String
   ): [Game!]
     @cypher(
       statement: """
       CALL apoc.do.when(
-        searchString IS NULL,
+        $searchString IS NULL,
         'MATCH (node:Game) RETURN node',
         'CALL db.index.fulltext.queryNodes(index, searchString) YIELD node WITH node RETURN node',
         {searchString: $searchString, index: 'gameNameIndex'}
       ) YIELD value
-      WITH value.node AS node
+      WITH DISTINCT value.node AS node
       CALL apoc.do.when(
         $genreId IS NULL,
         'RETURN node',
         'MATCH (node)-[:HAS_GENRE]->(:Genre {id: genreId}) RETURN node',
         {genreId: $genreId, node: node}
       ) YIELD value
-      WITH value.node AS node
+      WITH DISTINCT value.node AS node
       CALL apoc.do.when(
         $parentPlatformId IS NULL,
         'RETURN node',
         'MATCH (:ParentPlatform {id: parentPlatformId})<-[:IN_CATEGORY]-(:Platform)-[:CAN_PLAY]->(node) RETURN node',
         {parentPlatformId: $parentPlatformId, node: node}
       ) YIELD value
+      WITH DISTINCT value.node AS node
+      CALL apoc.do.when(
+        $order IS NULL,
+        'RETURN node',
+        'RETURN node ORDER BY node[order] DESC',
+        {order: $order, node: node}
+      ) YIELD value
       WITH value.node AS node
-      RETURN DISTINCT node
-      ORDER BY node[$order] DESC
+      RETURN node
       SKIP $offset LIMIT $limit
       """
     )

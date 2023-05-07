@@ -10,7 +10,7 @@ const GameGrid = ({ gameQuery }) => {
   const skeletons = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12];
 
   if (error) return <Text>{error.message}</Text>;
-  // const fetchedGamesCount = data?.length || 0;
+  const fetchedGamesCount = data?.search?.length || 0;
 
   return (
     <Box padding="10px">
@@ -28,15 +28,15 @@ const GameGrid = ({ gameQuery }) => {
         ))}
       </SimpleGrid>
       <Button
-        onClick={() =>
+        onClick={(event) =>
           fetchMore({
             variables: {
-              offset: data?.search?.length || 0,
+              offset: fetchedGamesCount,
             },
           })
         }
       >
-        {loading ? "Loading..." : "Load More"}
+        {"Load More"}
       </Button>
     </Box>
   );

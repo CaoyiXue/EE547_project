@@ -1,16 +1,20 @@
-
 type Query {
   search(
-    searchString: String = "*"
+    searchString: String
     genreId: String
     parentPlatformId: String
-    order: String = ""
     options: GameOptions
+    sortOrder: String
   ): [Game!]
     @cypher(
       statement: """
-      CALL db.index.fulltext.queryNodes('gameNameIndex', $searchString)
-      YIELD node WITH node
+      CALL apoc.do.when(
+        $searchString IS NULL,
+        'MATCH (node:Game) RETURN node',
+        'CALL db.index.fulltext.queryNodes(index, searchString) YIELD node WITH node RETURN node',
+        {searchString: $searchString, index: 'gameNameIndex'}
+      ) YIELD value
+      WITH value.node AS node
       CALL apoc.do.when(
         $genreId IS NULL,
         'RETURN node',
@@ -21,13 +25,20 @@ type Query {
       CALL apoc.do.when(
         $parentPlatformId IS NULL,
         'RETURN node',
-        'MATCH (:ParentPlatform {id: parentPlatformId})<-[:IN_CATEGORY]-(:Platform)-[:CAN_PLAY]->(node) RETURN node',
+        'MATCH (pp:ParentPlatform {id: parentPlatformId})<-[:IN_CATEGORY]-(:Platform)-[:CAN_PLAY]->(node) RETURN node',
         {parentPlatformId: $parentPlatformId, node: node}
       ) YIELD value
       WITH value.node AS node
-      RETURN DISTINCT node
-      ORDER BY node[$order] DESC
-      SKIP $options.offset LIMIT $options.limit
+      WITH DISTINCT node AS node
+      CALL apoc.do.when(
+        $sortOrder IS NULL,
+        'RETURN node',
+        'RETURN node ORDER BY node[sortOrder] DESC',
+        {sortOrder: $sortOrder, node: node}
+      ) YIELD value
+      WITH value.node AS node
+      RETURN node
+      SKIP $options.offset LIMIT($options.limit)
       """
     )
 }
