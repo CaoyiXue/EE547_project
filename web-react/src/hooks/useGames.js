@@ -34,7 +34,6 @@ const SEARCH_GAMES = gql`
 `;
 
 const useGames = (gameQuery) => {
-  console.log(gameQuery);
   return useQuery(SEARCH_GAMES, {
     variables: {
       searchString: gameQuery.searchString || null,
