@@ -1,7 +1,7 @@
 import { Button, HStack, Image, useDisclosure } from "@chakra-ui/react";
 import portrait from "../assets/portrait.png";
-import ModalForm from "./ModalForm";
 import useAuthStatusStore from "../stores/authStore";
+import ModalForm from "./ModalForm";
 
 const AuthStatus = () => {
   const { isOpen, onOpen, onClose } = useDisclosure();

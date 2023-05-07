@@ -1,11 +1,7 @@
 import { Button } from "@chakra-ui/button";
 import { FormControl, FormLabel } from "@chakra-ui/form-control";
-import {
-  Input,
-  InputRightElement,
-  InputLeftElement,
-  InputGroup,
-} from "@chakra-ui/input";
+import { Input, InputGroup, InputRightElement } from "@chakra-ui/input";
+import { Text } from "@chakra-ui/layout";
 import {
   Modal,
   ModalBody,
@@ -15,11 +11,10 @@ import {
   ModalHeader,
   ModalOverlay,
 } from "@chakra-ui/modal";
-import { useRef, useState } from "react";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { useState } from "react";
 import { useForm } from "react-hook-form";
 import z from "zod";
-import { zodResolver } from "@hookform/resolvers/zod";
-import { Text } from "@chakra-ui/layout";
 import useAuthStatusStore from "../stores/authStore";
 
 const logInSchema = z.object({
