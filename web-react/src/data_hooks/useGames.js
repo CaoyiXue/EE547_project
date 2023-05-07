@@ -1,4 +1,5 @@
-import { useQuery, gql } from "@apollo/client";
+import { gql, useQuery } from "@apollo/client";
+import useGameQueryStore from "../stores/gameStore";
 
 const SEARCH_GAMES = gql`
   query Query(
@@ -33,15 +34,16 @@ const SEARCH_GAMES = gql`
   }
 `;
 
-const useGames = (gameQuery) => {
+const useGames = () => {
+  const gameQuery = useGameQueryStore((s) => s.gameQuery);
   return useQuery(SEARCH_GAMES, {
     variables: {
       searchString: gameQuery.searchString || null,
-      genreId: gameQuery.genre?.id || null,
-      parentPlatformId: gameQuery.parentPlatform?.id || null,
+      genreId: gameQuery.genreId === "0" ? null : gameQuery.genreId || null,
+      parentPlatformId: gameQuery.platformId === "0" ? null : gameQuery.platformId || null,
       offset: 0,
       limit: 12,
-      order: gameQuery.sortOrder || "",
+      order: gameQuery.sortOrder || null,
     },
   });
 };

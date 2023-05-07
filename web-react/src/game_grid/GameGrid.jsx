@@ -1,12 +1,12 @@
-import { SimpleGrid, Text, Spinner, Button, Box } from "@chakra-ui/react";
+import { SimpleGrid, Spinner, Text } from "@chakra-ui/react";
 import InfiniteScroll from "react-infinite-scroll-component";
+import useGames from "../data_hooks/useGames";
 import GameCard from "./GameCard";
 import GameCardContainer from "./GameCardContainer";
 import GameCardSkeleton from "./GameCardSkeleton";
-import useGames from "../hooks/useGames";
 
-const GameGrid = ({ gameQuery }) => {
-  const { loading, error, data, fetchMore } = useGames(gameQuery);
+const GameGrid = () => {
+  const { loading, error, data, fetchMore } = useGames();
   const skeletons = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12];
 
   if (error) return <Text>{error.message}</Text>;
@@ -38,17 +38,6 @@ const GameGrid = ({ gameQuery }) => {
           </GameCardContainer>
         ))}
       </SimpleGrid>
-      {/* <Button
-        onClick={(event) =>
-          fetchMore({
-            variables: {
-              offset: fetchedGamesCount,
-            },
-          })
-        }
-      >
-        {"Load More"}
-      </Button> */}
     </InfiniteScroll>
   );
 };

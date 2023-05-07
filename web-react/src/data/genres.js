@@ -1,5 +1,11 @@
 export default [
   {
+    id: "0",
+    name: "All",
+    slug: "All",
+    image_background:"",
+  },
+  {
     id: "4",
     name: "Action",
     slug: "action",

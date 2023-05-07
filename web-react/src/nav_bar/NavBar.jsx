@@ -1,47 +1,31 @@
 import {
-  Input,
-  InputGroup,
-  InputLeftElement,
   Button,
-  Image,
-  Link,
   HStack,
+  Image,
+  Link
 } from "@chakra-ui/react";
 import { useRef } from "react";
-import { BsSearch } from "react-icons/bs";
-import reactLogo from "../assets/react.svg";
 import portrait from "../assets/portrait.png";
+import reactLogo from "../assets/react.svg";
+import SearchInput from "./SearchInput";
 
 const NavBar = ({
   logInOnOpen,
   signUpOnOpen,
   signState,
   onSignOut,
-  onSearch,
 }) => {
   const ref = useRef(null);
 
   return (
     <HStack justifyContent="space-between" padding="10px 70px 10px 25px">
+      
       <Link to="/">
         <Image src={reactLogo} boxSize="60px" />
       </Link>
-      <form
-        onSubmit={(event) => {
-          event.preventDefault();
-          if (ref.current) onSearch(ref.current.value || undefined);
-        }}
-      >
-        <InputGroup>
-          <InputLeftElement children={<BsSearch />} />
-          <Input
-            ref={ref}
-            borderRadius={20}
-            placeholder="Search games..."
-            variant="filled"
-          />
-        </InputGroup>
-      </form>
+
+      <SearchInput />
+
       <HStack paddingLeft={1}>
         <Button
           colorScheme="twitter"

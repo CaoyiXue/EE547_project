@@ -1,15 +1,15 @@
+import { HStack, Icon } from "@chakra-ui/react";
+import { BsGlobe } from "react-icons/bs";
 import {
-  FaWindows,
-  FaPlaystation,
-  FaXbox,
+  FaAndroid,
   FaApple,
   FaLinux,
-  FaAndroid,
+  FaPlaystation,
+  FaWindows,
+  FaXbox,
 } from "react-icons/fa";
 import { MdPhoneIphone } from "react-icons/md";
 import { SiNintendo } from "react-icons/si";
-import { BsGlobe } from "react-icons/bs";
-import { HStack, Icon } from "@chakra-ui/react";
 
 const PlatformIconList = ({ platforms = [] }) => {
   const iconMap = {

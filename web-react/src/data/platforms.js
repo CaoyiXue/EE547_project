@@ -1,5 +1,10 @@
 export default [
   {
+    id: "0",
+    name: "All",
+    slug: "All",
+  },
+  {
     id: "1",
     name: "PC",
     slug: "pc",

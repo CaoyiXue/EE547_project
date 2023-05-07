@@ -1,12 +1,19 @@
-import { Box, Grid, GridItem, Show, useDisclosure, Flex } from "@chakra-ui/react";
-import { useEffect, useState } from "react";
-import NavBar from "./components/NavBar";
-import GameGrid from "./components/GameGrid";
-import GenreList from "./components/GenreList";
+import {
+  Box,
+  Flex,
+  Grid,
+  GridItem,
+  Show,
+  useDisclosure,
+} from "@chakra-ui/react";
+import { useState } from "react";
 import ModalForm from "./components/ModalForm";
-import GameHeading from "./components/GameHeading";
-import PlatformSelector from "./components/PlatformSelector";
-import SortSelector from "./components/SortSelector";
+import GameGrid from "./game_grid/GameGrid";
+import GameHeading from "./game_heading/GameHeading";
+import PlatformSelector from "./game_selector/PlatformSelector";
+import SortSelector from "./game_selector/SortSelector";
+import GenreList from "./genre_list/GenreList";
+import NavBar from "./nav_bar/NavBar";
 
 function App() {
   const {
@@ -22,7 +29,6 @@ function App() {
   } = useDisclosure();
 
   const [signState, setSignState] = useState(false);
-  const [gameQuery, setGameQuery] = useState({});
 
   return (
     <>
@@ -45,44 +51,28 @@ function App() {
             onSignOut={() => {
               window.location.href = "/";
             }}
-            onSearch={(searchString) =>
-              setGameQuery({ ...gameQuery, searchString })
-            }
           />
         </GridItem>
 
         {/* Genre Aside. If small screen, do not show it*/}
         <Show above="lg">
           <GridItem area="aside" paddingX={5}>
-            <GenreList
-              selectedGenre={gameQuery.genre}
-              onSelectGenre={(genre) => setGameQuery({ ...gameQuery, genre })}
-            ></GenreList>
+            <GenreList />
           </GridItem>
         </Show>
 
         {/* Game Cards*/}
         <GridItem area="main">
           <Box paddingLeft={2}>
-            <GameHeading gameQuery={gameQuery} />
+            <GameHeading />
             <Flex marginBottom={5}>
               <Box marginRight={5}>
-                <PlatformSelector
-                  selectedParentPlatform={gameQuery.parentPlatform}
-                  onSelectParentPlatform={(parentPlatform) =>
-                    setGameQuery({ ...gameQuery, parentPlatform })
-                  }
-                />
+                <PlatformSelector />
               </Box>
-              <SortSelector
-                sortOrder={gameQuery.sortOrder}
-                onSelectSortOrder={(sortOrder) =>
-                  setGameQuery({ ...gameQuery, sortOrder })
-                }
-              />
+              <SortSelector />
             </Flex>
           </Box>
-          <GameGrid gameQuery={gameQuery} />
+          <GameGrid />
         </GridItem>
       </Grid>
 
