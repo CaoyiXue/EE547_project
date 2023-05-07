@@ -43,14 +43,44 @@ type Query {
     )
 }
 
-type Developer {
-  games: [Game!]! @relationship(type: "DEVELOP", direction: OUT)
-  id: String!
-  name: String!
-  slug: String!
+interface ClickProperties @relationshipProperties {
+  value: BigInt!
 }
 
-type Game {
+interface LikeProperties @relationshipProperties {
+  value: BigInt!
+}
+
+type User {
+  name: String
+  email: String!
+  passward: String!
+  click: [Game!]!
+    @relationship(type: "CLICK", direction: OUT, properties: "ClickProperties")
+  like: [Game!]!
+    @relationship(type: "LIKE", direction: OUT, properties: "LikeProperties")
+  want_play: [Game!]! @relationship(type: "WANT_PLAY", direction: OUT)
+  recommend(gameId: String!, first: Int = 6): [User]
+    @cypher(
+      statement: """
+      MATCH (this)-[:WANT_PLAY]->(g:Game {id: $gameID})<-[:WANT_PLAY]-(others:User)
+
+      OPTIONAL MATCH (u)-[r1s:LIKE|CLICK]->(gs:Game)<-[r2s:LIKE|CLICK]-(others)
+      WITH r1s, r2s, (r1s.value+r2s.value)*100 AS scores1, others
+      UNWIND others as other
+      WITH other AS others, sum(scores1) AS scores1
+
+      OPTIONAL MATCH (u)-[rel21s:LIKE|CLICK]->(g1s:Game)-[:DEVELOP|CAN_PLAY|PUBLISH|HAS_GENRE|HAS_TAG]-(overlaps)-[:DEVELOP|CAN_PLAY|PUBLISH|HAS_GENRE|HAS_TAG]-(g2s:Game)<-[rel22s:LIKE|CLICK]-(others)
+      WITH rel21s, rel22s, count(overlaps)*(rel21s.value+rel22s.value) AS scores2, others, scores1
+      UNWIND others AS other
+      WITH other, sum(scores2) AS scores2, scores1
+      WITH other AS others, scores2+scores1 AS scores
+      RETURN others ORDER BY scores DESC
+      """
+    )
+}
+
+type Game @exclude(operations: [CREATE, UPDATE, DELETE]) {
   background_image: String
   description_raw: String!
   developers: [Developer!]! @relationship(type: "DEVELOP", direction: IN)
@@ -73,9 +103,29 @@ type Game {
   released: Date
   screen_shots: [String]!
   slug: String!
+  similar(first: Int = 6): [Game]
+    @cypher(
+      statement: """
+      MATCH (this)-[:DEVELOP|:CAN_PLAY|:PUBLISH|:HAS_GENRE|:HAS_TAG]-(overlap)-[:DEVELOP|:CAN_PLAY|:PUBLISH|:HAS_GENRE|:HAS_TAG]-(res:Game)
+      WITH res, COUNT(*) AS score
+      RETURN res ORDER BY score DESC LIMIT $first
+      """
+    )
+  users_click: [User!]!
+    @relationship(type: "CLICK", direction: IN, properties: "ClickProperties")
+  users_like: [User!]!
+    @relationship(type: "LIKE", direction: IN, properties: "LikeProperties")
+  users_want_play: [User!]! @relationship(type: "WANT_PLAY", direction: IN)
 }
 
-type Genre {
+type Developer @exclude(operations: [CREATE, UPDATE, DELETE]) {
+  games: [Game!]! @relationship(type: "DEVELOP", direction: OUT)
+  id: String!
+  name: String!
+  slug: String!
+}
+
+type Genre @exclude(operations: [CREATE, UPDATE, DELETE]) {
   games: [Game!]! @relationship(type: "HAS_GENRE", direction: IN)
   id: String!
   image_background: String!
@@ -83,14 +133,14 @@ type Genre {
   slug: String!
 }
 
-type ParentPlatform {
+type ParentPlatform @exclude(operations: [CREATE, UPDATE, DELETE]) {
   id: String!
   name: String!
   platforms: [Platform!]! @relationship(type: "IN_CATEGORY", direction: IN)
   slug: String!
 }
 
-type Platform {
+type Platform @exclude(operations: [CREATE, UPDATE, DELETE]) {
   games: [Game!]! @relationship(type: "CAN_PLAY", direction: OUT)
   id: String!
   parent_platforms: [ParentPlatform!]!
@@ -99,14 +149,14 @@ type Platform {
   slug: String!
 }
 
-type Publisher {
+type Publisher @exclude(operations: [CREATE, UPDATE, DELETE]) {
   id: String!
   name: String!
   games: [Game!]! @relationship(type: "PUBLISH", direction: OUT)
   slug: String!
 }
 
-type Tag {
+type Tag @exclude(operations: [CREATE, UPDATE, DELETE]) {
   games: [Game!]! @relationship(type: "HAS_TAG", direction: IN)
   id: String!
   name: String!

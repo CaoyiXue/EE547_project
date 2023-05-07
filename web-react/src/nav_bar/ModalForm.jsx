@@ -20,6 +20,7 @@ import { useForm } from "react-hook-form";
 import z from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Text } from "@chakra-ui/layout";
+import useAuthStatusStore from "../stores/authStore";
 
 const logInSchema = z.object({
   email: z
@@ -51,23 +52,24 @@ const formMap = {
   },
 };
 
-function ModalForm({ isOpen, onClose, onSubmit, formType }) {
+function ModalForm({ isOpen, onClose, onSubmit }) {
   const [show, setShow] = useState(false);
+  const { status } = useAuthStatusStore();
   const {
     register,
     handleSubmit,
     formState: { errors },
-  } = useForm({ resolver: zodResolver(formMap[formType].schema) });
+  } = useForm({ resolver: zodResolver(formMap[status]?.schema) });
 
   return (
     <>
       <Modal isOpen={isOpen} onClose={onClose} isCentered>
         <ModalOverlay />
         <ModalContent>
-          <ModalHeader>{formMap[formType].header}</ModalHeader>
+          <ModalHeader>{formMap[status]?.header}</ModalHeader>
           <ModalCloseButton />
           <ModalBody pb={6}>
-            {formType == "sign-up" && (
+            {status == "sign-up" && (
               <FormControl>
                 <FormLabel>Name</FormLabel>
                 <Input {...register("name")} placeholder="Enter name" />
@@ -106,7 +108,7 @@ function ModalForm({ isOpen, onClose, onSubmit, formType }) {
           </ModalBody>
           <ModalFooter>
             <Button colorScheme="blue" mr={3} onClick={handleSubmit(onSubmit)}>
-              {formMap[formType].footer}
+              {formMap[status]?.footer}
             </Button>
             <Button onClick={onClose}>Cancel</Button>
           </ModalFooter>

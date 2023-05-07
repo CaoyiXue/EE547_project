@@ -7,7 +7,7 @@ import {
   useDisclosure,
 } from "@chakra-ui/react";
 import { useState } from "react";
-import ModalForm from "./components/ModalForm";
+import ModalForm from "./nav_bar/ModalForm";
 import GameGrid from "./game_grid/GameGrid";
 import GameHeading from "./game_heading/GameHeading";
 import PlatformSelector from "./game_selector/PlatformSelector";
@@ -44,14 +44,7 @@ function App() {
       >
         {/* Navigation Bar*/}
         <GridItem area="nav">
-          <NavBar
-            logInOnOpen={logInOnOpen}
-            signUpOnOpen={signUpOnOpen}
-            signState={signState}
-            onSignOut={() => {
-              window.location.href = "/";
-            }}
-          />
+          <NavBar />
         </GridItem>
 
         {/* Genre Aside. If small screen, do not show it*/}
@@ -75,28 +68,6 @@ function App() {
           <GameGrid />
         </GridItem>
       </Grid>
-
-      {/* Modal Forms of Log In and Sign Up */}
-      <ModalForm
-        isOpen={signInIsOpen}
-        onClose={signInOnClose}
-        onSubmit={(data) => {
-          console.log(data);
-          setSignState(true);
-          signInOnClose();
-        }}
-        formType="log-in"
-      ></ModalForm>
-      <ModalForm
-        isOpen={signUpIsOpen}
-        onClose={signUpOnClose}
-        onSubmit={(data) => {
-          console.log(data);
-          setSignState(true);
-          signUpOnClose();
-        }}
-        formType="sign-up"
-      ></ModalForm>
     </>
   );
 }

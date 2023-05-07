@@ -2,7 +2,8 @@ import { create } from "zustand";
 
 const useGameQueryStore = create((set) => ({
   gameQuery: {},
-  setSearchString: (searchString) => set(() => ({ gameQuery: { searchString } })),
+  setSearchString: (searchString) =>
+    set((store) => ({ gameQuery: { ...store.gameQuery, searchString } })),
   setGenreId: (genreId) =>
     set((store) => ({
       gameQuery: { ...store.gameQuery, genreId },

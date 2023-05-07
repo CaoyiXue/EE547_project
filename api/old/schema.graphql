@@ -17,7 +17,7 @@ type User {
   name: String
   email: String!
   passward: String!
-  recommend(gameID: BigInt!,  first: Int = 6): [User]
+  recommend(gameId: String!, first: Int = 6): [User]
     @cypher(
       statement: """
       MATCH (this)-[:WANT_PLAY]->(g:Game {id: $gameID})<-[:WANT_PLAY]-(others:User)
