@@ -30,7 +30,7 @@ app.use(
   "/graphql",
   cors({
     origin: [
-      "http://3.135.201.152:3000",
+      "http://3.13.47.159:3000",
       "http://localhost:3000",
       "http://web:3000",
       "http://127.0.0.1:5173",
