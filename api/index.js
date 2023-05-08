@@ -9,8 +9,9 @@ import neo4j from "neo4j-driver";
 import { Neo4jGraphQL } from "@neo4j/graphql";
 import resolvers from "./resolvers.js";
 import { readFileSync } from "fs";
+import __dirname from "./dirname.js";
 
-const typeDefs = readFileSync("./schema.graphql", "utf-8");
+const typeDefs = readFileSync(`${__dirname}/schema.graphql`, "utf-8");
 const driver = neo4j.driver(
   "neo4j+s://7466064e.databases.neo4j.io",
   neo4j.auth.basic("neo4j", "caoyixue")

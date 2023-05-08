@@ -1,4 +1,0 @@
-chmod 400 ee547.pem
-ssh -i ee547.pem ec2-user@ec2-3-13-47-159.us-east-2.compute.amazonaws.com
-GitHub token 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
-
