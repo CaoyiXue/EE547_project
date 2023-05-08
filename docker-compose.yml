@@ -1,13 +1,12 @@
 version: "3.8"
 services:
   web:
-    build: ./web-app
+    build: ./web-react
     ports:
       - 3000:3000
     environment:
-      REACT_APP_API_URL: 
+      REACT_APP_API_URL: http://api:3001/graphql
   api:
     build: ./api
     ports:
       - 3001:3001
-    

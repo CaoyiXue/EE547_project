@@ -26,7 +26,22 @@ const server = new ApolloServer({
 });
 await server.start();
 
-app.use("/graphql", cors(["*"]), bodyParser.json(), expressMiddleware(server));
+app.use(
+  "/graphql",
+  cors({
+    origin: [
+      "http://3.135.201.152:3000",
+      "http://3.135.201.152:3000",
+      "http://localhost:3000",
+      "http://web:5174",
+      "http://127.0.0.1:5173",
+      "http://::1:5173",
+      "https://studio.apollographql.com",
+    ],
+  }),
+  bodyParser.json(),
+  expressMiddleware(server)
+);
 
 await new Promise((resolve) => httpServer.listen({ port: 3001 }, resolve));
 

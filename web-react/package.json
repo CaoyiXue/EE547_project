@@ -4,9 +4,9 @@
   "version": "0.0.0",
   "type": "module",
   "scripts": {
-    "dev": "vite",
+    "dev": "vite --port 3000",
     "build": "vite build",
-    "preview": "vite preview",
+    "preview": "vite preview --port 3000",
     "host": "vite --host --port 3000"
   },
   "dependencies": {
@@ -23,7 +23,8 @@
     "react-icons": "^4.8.0",
     "react-infinite-scroll-component": "^6.1.0",
     "react-router-dom": "^6.10.0",
-    "zustand": "^4.3.7"
+    "zustand": "^4.3.7",
+    "zod": "^3.21.4"
   },
   "devDependencies": {
     "@types/react": "^18.0.27",
