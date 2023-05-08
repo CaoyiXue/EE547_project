@@ -28,20 +28,11 @@ await server.start();
 
 app.use(
   "/graphql",
-  cors({
-    origin: [
-      "http://3.135.201.152:4173",
-      "http://3.135.201.152:5173",
-      "http://localhost:4173",
-      "http://localhost:5174",
-      "http://localhost:5173",
-      "https://studio.apollographql.com",
-    ],
-  }),
+  cors(),
   bodyParser.json(),
   expressMiddleware(server)
 );
 
-await new Promise((resolve) => httpServer.listen({ port: 8088 }, resolve));
+await new Promise((resolve) => httpServer.listen({ port: 3001 }, resolve));
 
-console.log(`🚀 Server ready at http://localhost:8088/graphql`);
+console.log(`🚀 Server ready at http://localhost:3001/graphql`);
