@@ -32,7 +32,7 @@ function App() {
         </Show>
 
         {/* Game Cards*/}
-        <GridItem area="main">
+        <GridItem area="main" marginRight={15}>
           <Box paddingLeft={2}>
             <GameHeading />
             <Flex marginBottom={5}>
