@@ -4,8 +4,10 @@ services:
     build: ./web-react
     ports:
       - 3000:3000
+    depends_on:
+      - api
     environment:
-      REACT_APP_API_URL: http://api:3001/graphql
+      GRAPQL_API_URL: http://localhost:3001/graphql
   api:
     build: ./api
     ports:
